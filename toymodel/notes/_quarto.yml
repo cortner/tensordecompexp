@@ -1,0 +1,18 @@
+project:
+  type: book
+
+book:
+  title: "Tensor Decomposition Notes"
+  author:
+    - name: Christoph Ortner
+      affiliation: University of British Columbia
+  date: today
+  chapters:
+    - index.qmd
+    - tucker.qmd
+    - als.qmd
+
+format:
+  html:
+    theme: cosmo
+    html-math-method: mathjax

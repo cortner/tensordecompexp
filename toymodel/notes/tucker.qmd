@@ -1,0 +1,53 @@
+# Tucker Decomposition
+
+## Definition
+
+The Tucker decomposition expresses a tensor as the product of a core tensor
+multiplied by a factor matrix along each mode. For a third-order tensor
+$\mathcal{T} \in \mathbb{R}^{I_1 \times I_2 \times I_3}$, the Tucker
+decomposition takes the form
+$$
+\mathcal{T} \approx \mathcal{G} \times_1 U^{(1)} \times_2 U^{(2)} \times_3 U^{(3)},
+$$
+where
+
+- $\mathcal{G} \in \mathbb{R}^{R_1 \times R_2 \times R_3}$ is the **core tensor**,
+- $U^{(n)} \in \mathbb{R}^{I_n \times R_n}$, $n = 1, 2, 3$, are the **factor matrices**,
+- $\times_n$ denotes the $n$-mode product, and
+- $(R_1, R_2, R_3)$ is the **multilinear rank**.
+
+In element-wise notation this reads
+$$
+\mathcal{T}_{i_1 i_2 i_3}
+\approx \sum_{r_1=1}^{R_1} \sum_{r_2=1}^{R_2} \sum_{r_3=1}^{R_3}
+g_{r_1 r_2 r_3} \, u^{(1)}_{i_1 r_1} \, u^{(2)}_{i_2 r_2} \, u^{(3)}_{i_3 r_3}.
+$$
+
+## Mode-$n$ Unfolding
+
+A key operation underlying many Tucker algorithms is the **mode-$n$
+unfolding** (or matricisation) of a tensor. The mode-$n$ unfolding of
+$\mathcal{T}$, denoted $T_{(n)}$, rearranges the tensor into a matrix
+by mapping mode $n$ to the rows and all remaining modes to the columns.
+
+For a third-order tensor $\mathcal{T} \in \mathbb{R}^{I_1 \times I_2 \times I_3}$:
+
+- $T_{(1)} \in \mathbb{R}^{I_1 \times I_2 I_3}$,
+- $T_{(2)} \in \mathbb{R}^{I_2 \times I_1 I_3}$,
+- $T_{(3)} \in \mathbb{R}^{I_3 \times I_1 I_2}$.
+
+In terms of the mode-$n$ unfolding, the Tucker decomposition can be written as
+$$
+T_{(n)} \approx U^{(n)} G_{(n)} \bigl( U^{(n+2)} \otimes U^{(n+1)} \bigr)^\top,
+$$
+where indices are understood cyclically and $\otimes$ denotes the Khatri–Rao
+(column-wise Kronecker) product.
+
+## Special Cases
+
+- When $R_n = I_n$ for all $n$, the decomposition is exact and the core tensor
+  $\mathcal{G}$ captures all the information.
+- When $R_1 = R_2 = R_3 = R$ and the core tensor is superdiagonal, the Tucker
+  decomposition reduces to the **CP (canonical polyadic) decomposition**.
+- The **higher-order SVD (HOSVD)** is a specific Tucker decomposition where
+  each factor matrix $U^{(n)}$ is obtained from the SVD of $T_{(n)}$.

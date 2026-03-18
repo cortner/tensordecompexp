@@ -1,0 +1,5 @@
+# Preface {.unnumbered}
+
+These notes summarise key ideas and algorithms for tensor decompositions,
+with a focus on the Tucker decomposition and alternating least squares (ALS)
+algorithms for computing it.

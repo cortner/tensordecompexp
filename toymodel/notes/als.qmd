@@ -1,0 +1,102 @@
+# ALS Algorithms for Tucker Decomposition
+
+We describe two standard alternating algorithms for computing the Tucker
+decomposition of a tensor $\mathcal{T} \in \mathbb{R}^{I_1 \times I_2 \times I_3}$
+with target multilinear rank $(R_1, R_2, R_3)$. Both algorithms seek to minimise
+$$
+\min_{U^{(1)}, U^{(2)}, U^{(3)}, \mathcal{G}}
+\bigl\| \mathcal{T} - \mathcal{G} \times_1 U^{(1)} \times_2 U^{(2)} \times_3 U^{(3)} \bigr\|_F^2.
+$$
+
+## Higher-Order Alternating Least Squares (HOALS) {#sec-hoals}
+
+The first algorithm alternates over the three modes, updating one factor matrix
+at a time while holding the others fixed. At each step, the subproblem reduces
+to a standard matrix least squares problem via mode-$n$ unfolding.
+
+### Algorithm
+
+Given an initialisation $U^{(1)}, U^{(2)}, U^{(3)}$, repeat until convergence:
+
+**For $n = 1, 2, 3$:**
+
+1. Form the matrix
+$$
+V^{(n)} = \bigl( U^{(n+2)} \otimes U^{(n+1)} \bigr),
+$$
+where indices are cyclic, i.e., for $n = 1$ we use $U^{(3)} \otimes U^{(2)}$, etc.
+
+2. Solve the least squares problem
+$$
+\min_{U^{(n)}, G_{(n)}} \bigl\| T_{(n)} - U^{(n)} G_{(n)} (V^{(n)})^\top \bigr\|_F^2
+$$
+for $U^{(n)}$ and the mode-$n$ unfolding of the core, $G_{(n)}$.
+
+   This is equivalent to solving
+$$
+\min_{W^{(n)}} \bigl\| T_{(n)} - W^{(n)} (V^{(n)})^\top \bigr\|_F^2
+$$
+where $W^{(n)} = U^{(n)} G_{(n)} \in \mathbb{R}^{I_n \times R_1 R_2 R_3 / R_n}$.
+The solution is
+$$
+W^{(n)} = T_{(n)} V^{(n)} \bigl( (V^{(n)})^\top V^{(n)} \bigr)^{-1}.
+$$
+
+3. Extract $U^{(n)}$ from $W^{(n)}$ by computing a (thin) QR or SVD factorisation
+   of $W^{(n)}$, retaining the leading $R_n$ columns.
+   Update $G_{(n)}$ accordingly:
+$$
+W^{(n)} = U^{(n)} G_{(n)}.
+$$
+
+**After cycling over all modes**, fold $G_{(n)}$ back into the core tensor $\mathcal{G}$.
+
+
+## Higher-Order Orthogonal Iteration (HOOI) {#sec-hooi}
+
+The second standard algorithm updates each factor matrix using the leading
+left singular vectors of a projected unfolding. This approach guarantees
+orthonormal factor matrices at every step.
+
+### Algorithm
+
+Given an initialisation $U^{(1)}, U^{(2)}, U^{(3)}$, repeat until convergence:
+
+**For $n = 1, 2, 3$:**
+
+1. Project the tensor onto the subspaces defined by all factor matrices
+   *except* the $n$-th:
+$$
+\mathcal{Y}^{(n)} = \mathcal{T} \times_{m \neq n} (U^{(m)})^\top.
+$$
+For a 3-d tensor with $n = 1$ this means
+$$
+\mathcal{Y}^{(1)} = \mathcal{T} \times_2 (U^{(2)})^\top \times_3 (U^{(3)})^\top,
+$$
+yielding $\mathcal{Y}^{(1)} \in \mathbb{R}^{I_1 \times R_2 \times R_3}$.
+
+2. Unfold $\mathcal{Y}^{(n)}$ along mode $n$ to obtain the matrix $Y^{(n)}_{(n)}$.
+   For $n = 1$, this gives $Y^{(1)}_{(1)} \in \mathbb{R}^{I_1 \times R_2 R_3}$.
+
+3. Compute the SVD
+$$
+Y^{(n)}_{(n)} = \hat U \Sigma V^\top
+$$
+and set $U^{(n)}$ to the leading $R_n$ left singular vectors of $Y^{(n)}_{(n)}$:
+$$
+U^{(n)} \leftarrow \hat{U}_{:, 1:R_n}.
+$$
+
+**After convergence**, compute the core tensor as
+$$
+\mathcal{G} = \mathcal{T} \times_1 (U^{(1)})^\top \times_2 (U^{(2)})^\top \times_3 (U^{(3)})^\top.
+$$
+
+### Properties
+
+- Each factor matrix $U^{(n)}$ is **column-orthonormal** by construction.
+- HOOI monotonically decreases the reconstruction error at each sub-step.
+- Initialising HOOI with the HOSVD (i.e., the truncated SVD of each $T_{(n)}$)
+  is a common and effective strategy.
+- HOOI is equivalent to an alternating maximisation of $\|\mathcal{G}\|_F^2$
+  subject to the orthonormality constraints on the factor matrices.
