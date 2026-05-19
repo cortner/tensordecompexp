@@ -1,0 +1,5 @@
+numpy
+matplotlib
+tensorly
+autograd
+scipy
